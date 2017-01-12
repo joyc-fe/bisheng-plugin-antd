@@ -47,6 +47,13 @@ function getCodeIndex(contentChildren) {
   );
 }
 
+function getConfIndex(contentChildren) {
+  return contentChildren.findIndex(node =>
+      JsonML.getTagName(node) === 'pre' &&
+      JsonML.getAttributes(node).lang === 'conf'
+  );
+}
+
 function getCorrespondingTSX(filename) {
   return path.join(process.cwd(), filename.replace(/\.md$/i, '.tsx'));
 }
@@ -62,6 +69,14 @@ function getSourceCodeObject(contentChildren, codeIndex) {
   return {
     isTS: true,
   };
+}
+
+function getConfObject(contentChildren, confIndex) {
+  if (confIndex > -1) {
+    return getCode(contentChildren[confIndex])
+
+  }
+  return null;
 }
 
 function getStyleNode(contentChildren) {
@@ -80,19 +95,24 @@ module.exports = (markdownData, isBuild) => {
   }
 
   // Update content of demo.
-  const contentChildren = JsonML.getChildren(markdownData.content);
-  const chineseIntroStart = getChineseIntroStart(contentChildren);
-  const englishIntroStart = getEnglishIntroStart(contentChildren);
-  const codeIndex = getCodeIndex(contentChildren);
-  const introEnd = codeIndex === -1 ? contentChildren.length : codeIndex;
-  if (chineseIntroStart > -1 /* equal to englishIntroStart > -1 */) {
+  var contentChildren = JsonML.getChildren(markdownData.content);
+
+  var chineseIntroStart = getChineseIntroStart(contentChildren);
+  var confIndex = getConfIndex(contentChildren);
+  var codeIndex = getCodeIndex(contentChildren);
+
+
+  var introEnd = confIndex === -1 ? ( codeIndex === -1 ? contentChildren.length: codeIndex) :  confIndex;
+  if (chineseIntroStart > -1) {
     markdownData.content = {
-      'zh-CN': contentChildren.slice(chineseIntroStart + 1, englishIntroStart),
-      'en-US': contentChildren.slice(englishIntroStart + 1, introEnd),
+      'zh-CN': contentChildren.slice(chineseIntroStart + 1, introEnd),
     };
   } else {
     markdownData.content = contentChildren.slice(0, introEnd);
   }
+
+  // 配置数据
+  markdownData.confData = JSON.parse(getConfObject(contentChildren, confIndex));
 
   const sourceCodeObject = getSourceCodeObject(contentChildren, codeIndex);
   if (sourceCodeObject.isES6) {
