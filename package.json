@@ -1,5 +1,5 @@
 {
-  "name": "bisheng-plugin-antd",
+  "name": "@nfe/bisheng-plugin-antd",
   "version": "0.6.1",
   "description": "To support ant.design-like websites.",
   "scripts": {
@@ -31,7 +31,7 @@
     "ant",
     "design"
   ],
-  "author": "Benjy Cui",
+  "author": "yuchao03",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/ant-design/bisheng-plugin-antd/issues"
